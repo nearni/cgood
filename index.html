@@ -94,6 +94,33 @@
       margin-bottom: 0.5rem;
       border-left: 5px solid #1e3a8a;
       border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    ul#orderItems button {
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .clear-btn {
+      display: block;
+      margin: 1rem auto 0;
+      background-color: #6b7280;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .clear-btn:hover {
+      background-color: #4b5563;
     }
 
     footer {
@@ -157,6 +184,7 @@
     <ul id="orderItems">
       <li>尚未選擇任何商品</li>
     </ul>
+    <button class="clear-btn" onclick="clearCart()">清空清單</button>
   </section>
 
   <footer>
@@ -164,21 +192,49 @@
   </footer>
 
   <script>
-    const orderItems = [];
+    const orderItems = {};
 
     function addToOrder(productName) {
-      if (!orderItems.includes(productName)) {
-        orderItems.push(productName);
+      if (orderItems[productName]) {
+        orderItems[productName]++;
+      } else {
+        orderItems[productName] = 1;
+      }
+      updateOrderList();
+    }
+
+    function removeFromOrder(productName) {
+      if (orderItems[productName]) {
+        orderItems[productName]--;
+        if (orderItems[productName] === 0) {
+          delete orderItems[productName];
+        }
         updateOrderList();
       }
+    }
+
+    function clearCart() {
+      for (let key in orderItems) {
+        delete orderItems[key];
+      }
+      updateOrderList();
     }
 
     function updateOrderList() {
       const list = document.getElementById('orderItems');
       list.innerHTML = '';
-      orderItems.forEach(item => {
+
+      const entries = Object.entries(orderItems);
+      if (entries.length === 0) {
         const li = document.createElement('li');
-        li.textContent = item;
+        li.textContent = '尚未選擇任何商品';
+        list.appendChild(li);
+        return;
+      }
+
+      entries.forEach(([name, quantity]) => {
+        const li = document.createElement('li');
+        li.innerHTML = `${name}（數量：${quantity}） <button onclick="removeFromOrder('${name}')">刪除</button>`;
         list.appendChild(li);
       });
     }
